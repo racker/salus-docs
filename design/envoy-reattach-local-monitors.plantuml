@@ -1,0 +1,71 @@
+@startuml
+
+title Sequence Detail for Envoy Re-Attachment
+
+participant Envoy
+participant Ambassador
+participant ResourceMgmt
+
+note over Envoy,ResourceMgmt
+This sequence diagram specifically
+focuses on the re-attachment
+of an Envoy and purposely omits
+other aspects of ResourceEvent usage.
+end note
+
+Envoy-->Ambassador: re-attach
+note right: with new envoy ID
+
+Ambassador-->UMB: AttachEvent
+UMB-->ResourceMgmt: consume AttachEvent
+
+activate ResourceMgmt
+
+ResourceMgmt->ResourceMgmt: handleEnvoyAttach
+
+alt existing resource previously associated with an envoy
+    ResourceMgmt-->UMB: ResourceEvent
+
+    note over ResourceMgmt,UMB
+    In this case contains at least:
+    - tenant ID
+    - resource ID
+    - re-attached envoy ID
+    end note
+end
+deactivate ResourceMgmt
+
+UMB-->MonitorMgmt: consume ResourceEvent
+activate MonitorMgmt
+alt inclusion of re-attached envoy ID
+  MonitorMgmt->MonitorMgmt: re-assign local monitors
+  MonitorMgmt->DB: query local monitors\nassigned to resource
+
+  loop for each bound monitor
+      MonitorMgmt->DB: set new envoy ID
+  end
+
+  MonitorMgmt-->UMB: MonitorBoundEvent
+end
+
+note over MonitorMgmt,UMB
+Contains
+- old envoy ID
+
+Keeps the system consistent just in case a new Envoy is
+"stealing" the resource designation from a still-running
+Envoy.
+end note
+
+MonitorMgmt-->UMB: MonitorBoundEvent
+
+note over MonitorMgmt,UMB
+Contains
+- new envoy ID
+end note
+
+deactivate MonitorMgmt
+
+UMB->Ambassador: consume MonitorBoundEvent
+
+@enduml

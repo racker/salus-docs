@@ -1,0 +1,63 @@
+@startuml
+
+agent telegraf
+component Envoy
+component Ambassador
+component MonitorManagement
+component ResourceManagement
+component ZoneWatcher
+database MySQL
+database etcd
+component MetricsIngest [
+MetricsIngest
+....
+Demo only
+]
+component EventEngineIngest
+component EventEngineManagement
+component KapacitorEventIngest [
+KapacitorEventIngest
+....
+Demo only
+]
+agent kapacitor
+queue UMB
+database InfluxDB [
+InfluxDB
+....
+Demo only
+]
+component Grafana [
+Grafana
+....
+Demo only
+]
+actor EndUser
+component PublicAPI
+
+telegraf == Envoy
+Envoy ==> Ambassador
+Ambassador ==> UMB
+Ambassador ~~ etcd
+ZoneWatcher ~~ etcd
+UMB ==> EventEngineIngest
+UMB ==> MetricsIngest
+MetricsIngest ==> InfluxDB
+EventEngineIngest ==> kapacitor
+kapacitor ==> UMB
+UMB ==> KapacitorEventIngest
+KapacitorEventIngest ==> InfluxDB
+
+MonitorManagement ~~ MySQL
+ResourceManagement ~~ MySQL
+EventEngineManagement ~~ MySQL
+EventEngineManagement ~~ kapacitor
+
+InfluxDB ==> Grafana
+
+EndUser -- PublicAPI
+PublicAPI -- MonitorManagement
+PublicAPI -- ResourceManagement
+PublicAPI -- EventEngineManagement
+
+@enduml

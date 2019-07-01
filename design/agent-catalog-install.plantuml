@@ -1,0 +1,78 @@
+@startuml
+
+actor User as user
+participant "Public API" as PublicApi
+participant "Agent Catalog Mgmt" as acm
+participant "Resource Mgmt" as rm
+database DB
+participant Kafka as kafka
+participant Ambassador as ambassador
+participant Envoy as envoy
+
+== User requests Agent install ==
+
+user -> PublicApi : POST: install
+note over user, PublicApi
+Includes:
+- agentReleaseId
+- resource labelSelectors
+end note
+PublicApi -> acm : POST: install
+acm -> DB : save new AgentInstallSelector
+acm -> rm : query resources with label selector
+
+loop resources
+  acm -> DB : save new BoundAgentInstall
+  acm -> kafka : produce AgentInstallChangeEvent
+  note over acm, kafka
+    Includes:
+    - tenantId
+    - resourceId
+    - agentType
+    - changeType [create|update|delete]
+  end note
+end
+
+== Handle AgentInstallChangeEvent ==
+
+kafka -> ambassador : consume AgentInstallChangeEvent
+
+opt Envoy attached to this Ambassador with resourceId
+
+  alt changeType is create or update
+    ambassador -> rm : query for agent install details for bound resourceId
+    ambassador -> Envoy : send install instruction
+  else changeType is delete
+    ambassador -> Envoy : send uninstall instruction
+  end
+
+end
+
+== Handle Resource change event ==
+
+kafka -> acm : consume resource change event
+
+opt labels or envoy updated
+  acm -> rm : get labels of resource
+  acm -> DB : query matching agent install selectors
+  acm -> acm : reconcile bound agent installs
+  acm -> DB : save new bindings, delete old bindings
+else resource deleted
+  acm -> DB : delete any BoundAgentInstall with resourceId
+end
+
+opt any bindings changed
+  acm -> kafka : produce AgentInstallChangeEvent
+end
+
+== Envoy attaches, agent install binding pre-exists ==
+
+note over acm,envoy
+This ends up getting handled by the sequences above since an
+Envoy attachment (first-time or re-attached) will utlimately
+result in a resource event produced by Resource Mgmt.
+The Agent Catalog Mgmt will ultimately produce a BoundAgentInstall event,
+which finally gets consumed by the Ambassador that has the Envoy attached.
+end note
+
+@enduml

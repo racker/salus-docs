@@ -1,0 +1,16 @@
+@startuml
+
+actor Admin
+boundary AdminApi
+participant "Agent Catalog Mgmt" as acm
+database DB
+
+Admin -> AdminApi : POST: create
+AdminApi -> acm : POST: create
+
+create entity AgentRelease
+acm -> AgentRelease : new
+acm -> DB : save AgentRelease
+
+
+@enduml

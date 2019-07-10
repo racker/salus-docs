@@ -52,18 +52,14 @@ See the Monitor Configuration section for how they are used.
 
 ### Metadata
 
-These are key/value mappings containing arbitrary non-identifying metadata
+These are key/value mappings containing arbitrary metadata.  These are essentially any other data you might want to store with the resource to be used in monitors, tasks, or any custom automation processes.
 
-These are similar to labels but have a few differences:
+These are similar to labels but they cannot be used within a monitor's `labelSelector` to match on the resource.
 
-1. They cannot be used within a monitor's `labelSelector` to match on the resource
-1. The value may contain either a single value or a list.
-
-
-If a metadata field is used within a monitor's configuration, the templated value will be replaced with the corresponding metadata value.  For example, if a url monitor is configured to use `address: ${resource.metadata.urls}` it will lead to a new bound monitor being created for each `url` within the metadata's list.
+If a metadata field is used within a monitor's configuration, the templated value will be replaced with the corresponding metadata value.  For example, if a url monitor is configured to use `address: ${resource.metadata.my_url}` it will lead to a new bound monitor being created for each matching resource, where the value of `address` will be the `my_url` metadata value on the resource.
 
 ## Monitor / Monitor Configuration
-A monitor configuration declares the details of what agent plugin you wish to utilize.  It also contains a list of labels which select the resources that will be monitored by this configuration.  For example, you may create a monitor configured to pull mysql metrics from Resources by including a label with key “type” and value “database” or http metrics from any Resource which have a label with key “host” and value “web\*” (wildcards are allowed).
+A monitor configuration declares the details of what agent plugin you wish to utilize.  It also contains a list of labels which select the resources that will be monitored by this configuration.  For example, you may create a monitor configured to pull mysql metrics from Resources by including a label with key “type” and value “database”.  You can also provide an empty `labelSelector` map if you want to match all resources - `{ }`.
 
 Whenever one or more resources matches the monitor configuration a monitor will be bound to each resource and begin retrieving the relevant metrics for that service.
 

@@ -65,7 +65,7 @@ If a metadata field is used within a monitor's configuration, the templated valu
 ## Monitor / Monitor Configuration
 A monitor configuration declares the details of what agent plugin you wish to utilize.  It also contains a list of labels which determine what resources these metrics should be pulled from.  For example, you may create a monitor configured to pull mysql metrics from Resources by including a label with key “type” and value “database” or http metrics from any Resource which have a label with key “host” and value “web\*” (wildcards are allowed).
 
-Whenever one or more resources matches the monitor configuration a monitor will be created for each resource and begin retrieving the relevant metrics for that service.
+Whenever one or more resources matches the monitor configuration a monitor will be bound to each resource and begin retrieving the relevant metrics for that service.
 
 ## Active Envoys
 The etcd stored collection of envoys that are currently connected to the Ambassador.

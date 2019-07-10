@@ -46,7 +46,7 @@ Resources can manually be created to represent any other object that should be m
 The field in which an envoy or resource can be uniquely represented on an account.  Within an envoy config file a `resource_id` field can be specified which contains the value used to tie the envoy to a particular Resource.  For example, on a cloud server the `resource_id` should typically be set as “xen-id:123abc", where "123abc" is the xenId value of the server.  When the envoy connects, the Ambassador will see this value and determine whether a new Resource needs to be created or if an existing one should be updated with any new discovered labels.
 
 ### Labels
-These are simple key/value mappings that can only consist of strings.  They are used to provide identitfiable data that can be used to uniquelly identify a device, such as `host: web0.example.com`, or they can be used as more generic identifiers to be able to form groups of devices: `type: web`.
+These are simple key/value mappings that can only consist of strings.  They are used to provide identifiable data that can be used to uniquely identify a device, such as `host: web0.example.com`, or they can be used as more generic identifiers to be able to form groups of devices: `type: web`.
 
 See the Monitor Configuration section for how they are used.
 

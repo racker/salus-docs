@@ -39,7 +39,7 @@ agent public_api
 agent admin_api
 
 frame SalusBackendApps {
-agent pm [
+agent prm [
   Presence Monitor
 ]
 agent auth [
@@ -59,6 +59,9 @@ agent rm [
 ]
 agent mm [
   Monitor Management
+]
+agent pm [
+  Policy Management
 ]
 agent zw [
   Zone Watcher
@@ -81,12 +84,17 @@ rm -down-> mysql
 
 mm -down-# umb
 mm -> rm : calls
+mm -> pm : calls
 mm -down-> mysql
 mm -down-> etcd
 
-pm -down-^ umb
-pm -down-> etcd
-pm -> rm : calls
+pm -down-# umb
+pm -> mm : calls
+pm -down-> mysql
+
+prm -down-^ umb
+prm -down-> etcd
+prm -> rm : calls
 
 zw -down-> etcd
 zw -down-^ umb
@@ -112,6 +120,7 @@ repose_public_api -down-> public_api
 public_api -down-> etcd
 public_api -down-> rm
 public_api -down-> mm
+public_api -down-> pm
 public_api -down-> evm
 public_api -down-> acm
 
@@ -119,9 +128,10 @@ salus_admin -down-> repose_admin_api
 repose_admin_api -down-> admin_api
 admin_api -down-> etcd
 admin_api -down-> mm
+admin_api -down-> pm
 admin_api -down-> rm
 admin_api -down-> evm
-admin_api -down-> pm
+admin_api -down-> prm
 admin_api -down-> acm
 
 @enduml

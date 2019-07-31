@@ -1,0 +1,55 @@
+@startuml
+
+title Test-Monitor operation when selecting a specific resource
+
+actor User
+participant PublicAPI
+participant MonitorMgmt as MM
+participant ResMgmt as RM
+participant UMB
+participant Ambassador as Amb
+participant Envoy
+participant Telegraf
+
+User -> PublicAPI: POST test-monitor
+activate PublicAPI
+
+PublicAPI -> MM: POST test-monitor
+activate MM
+
+MM -> RM: get resource details
+MM -> MM: render bound monitor DTO
+MM -\ UMB: produce test-monitor request event
+deactivate MM
+
+UMB --\ Amb: consume test-monitor request event
+note left: Instance per Group\nto "broadcast" events
+activate Amb
+opt Is Envoy attached to this Ambassador?
+  Amb -\ Envoy: send test-monitor instruction
+  deactivate Amb
+
+  activate Envoy
+  Envoy -> Telegraf: run with --test
+  activate Telegraf
+  return gather stdout
+  Envoy -> Amb: post test-monitor results
+  deactivate Envoy
+
+  activate Amb
+  Amb -\ UMB: produce test-monitor results event
+  deactivate Amb
+end
+
+UMB --\ MM: consume test-monitor results event
+note left: Instance per Group\nto "broadcast" events
+activate MM
+MM -> MM: correlate with test-monitor request
+
+MM --> PublicAPI: REST response
+deactivate MM
+
+PublicAPI --> User: REST response
+deactivate PublicAPI
+
+@enduml

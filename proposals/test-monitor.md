@@ -42,7 +42,7 @@ The good news is that the concept of an "instruction" was purposely generalized.
 
 Similarly, Ambassadors so far do not serve requests, but rather only initiate requests towards other microservices. As such, there is not a natural mechanism to invoke a synchronous operation, such as a test monitor, on a given Ambassador. The lack of incoming request serving is intentional since the deployment of Ambassadors is meant to be fluid as the capacity of the system needs to vary. 
 
-Ambassador already consume events, such as bound monitors, so that becomes a natural system flow to leverage for the proposal below.
+Ambassadors already consume events, such as bound monitors, so that becomes a natural system flow to leverage for the proposal below.
 
 ## Telegraf support
 
@@ -77,8 +77,19 @@ An important piece of information MonitorMgmt will need to store in memory is th
 **Note:** the inclusion of the bound monitor DTO within the event is purposely in contrast to the prevailing convention of state-less events. The inclusion is proposed as a lesser of two complexities. As an alternative, MonitorMgmt could store the test `Monitor` and `BoundMonitor` in the database with a new field in each to indicate that they are "test" variants. The addition of the new discriminator field is trivial, but would have possible implications on all queries of `Monitor` and `BoundMonitor`. Queries would need to exclude the test instances to ensure concurrent resource events would not accidentally retrieve and bind with the test monitor. 
 
 ### Instruction: test-monitor
+
+This is a new "EnvoyInstruction" message that will be added to the Telemetry Edge protobuf schema. It borrows heavily from the existing structure of the `EnvoyInstructionConfigure` since it needs to convey the same level of detail to configure the telegraf plugin.
+
 - correlation ID
 - monitor config JSON
+
+### Post test-monitor results
+
+This is request body of a new gRPC method of the `TelemetryAmbassador` service schema:
+
+- correlation ID
+- error message, if not fully successful
+- `Metric`, specifically a `NameTagValueMetric`
 
 ### Event: test-monitor results
 - correlation ID

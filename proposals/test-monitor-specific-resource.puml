@@ -23,7 +23,7 @@ MM -\ UMB: produce test-monitor request event
 deactivate MM
 
 UMB --\ Amb: consume test-monitor request event
-note left: Instance per Group\nto "broadcast" events
+note left: Broadcasted consumer
 activate Amb
 opt Is Envoy attached to this Ambassador?
   Amb -\ Envoy: send test-monitor instruction
@@ -42,7 +42,7 @@ opt Is Envoy attached to this Ambassador?
 end
 
 UMB --\ MM: consume test-monitor results event
-note left: Instance per Group\nto "broadcast" events
+note left: Broadcasted consumer
 activate MM
 MM -> MM: correlate with test-monitor request
 

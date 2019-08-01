@@ -48,7 +48,7 @@ Ambassadors already consume events, such as bound monitors, so that becomes a na
 
 As mentioned in the Jira issue, telegraf comes with a command-line option that is perfect for testing monitors, `--test`, which is tersely described [here in the Telegraf documentation](https://github.com/influxdata/telegraf#run-a-single-telegraf-collection-outputing-metrics-to-stdout).
 
-For this design, the proposal is to have the Envoy support test monitors by starting a very short-lived telegraf process that uses the `--test` command-line option. What will be left as an implementation detail is whether a small config file should be temporarily created or follow the pattern of the the `TelegrafRunner` to pass a config server URL that points back to the Envoy.
+For this design, the proposal is to have the Envoy support test monitors by starting a very short-lived telegraf process that uses the `--test` command-line option. The config URL approach currently implemented by `TelegrafRunner` will be used to pass a config server URL that points back to a short-lived configuration port that will serve the monitor/plugin config to test.
 
 ## Proposed System Flow
 

@@ -57,7 +57,7 @@ The following diagram shows the end-to-end, request-response flow of a test-moni
 
 [Diagram](test-monitor-specific-resource.puml)
 
-The continuous activation lifeline of the PublicAPI emphasizes that the REST API operation initiated by the user will be a "long running" and blocking call until the test-monitor results come back (or a timeout expires, which isn't depicted in the diagram). Spring Web supports request mappings that return `CompletableFuture`, which activates asynchronous servlet support. The advantage is that the HTTP REST request remains active, but doesn't consume a thread of the MonitorMgmt's embedded web server. The same would need to be applied to the PublicAPI proxy of the REST operation.
+The continuous activation lifeline of the PublicAPI emphasizes that the REST API operation initiated by the user will be a "long running" and blocking call until the test-monitor results come back (or a timeout expires, which isn't depicted in the diagram). Spring Web supports request mappings that return `DeferredResult`, which activates asynchronous servlet support. The advantage is that the HTTP REST request remains active, but doesn't consume a thread of the MonitorMgmt's embedded web server. The same would need to be applied to the PublicAPI proxy of the REST operation.
 
 In contrast, the break in the activation lifelines of MonitorMgmt and Ambassador indicate that each of those services will process the request asynchronously by temporarily storing the state of the request and concluding the state when the downstream service replies (or a timeout expires). It is expected that each would store that state in memory, which seems durable enough given how short a test-monitor should take to process. 
 
@@ -73,7 +73,7 @@ An important piece of information MonitorMgmt will need to store in memory is th
 - tenant ID
 - resource ID
 - envoy ID
-- bound monitor DTO
+- monitor configuration fields, such as those in bound monitor DTO
 
 **Note:** the inclusion of the bound monitor DTO within the event is purposely in contrast to the prevailing convention of state-less events. The inclusion is proposed as a lesser of two complexities. As an alternative, MonitorMgmt could store the test `Monitor` and `BoundMonitor` in the database with a new field in each to indicate that they are "test" variants. The addition of the new discriminator field is trivial, but would have possible implications on all queries of `Monitor` and `BoundMonitor`. Queries would need to exclude the test instances to ensure concurrent resource events would not accidentally retrieve and bind with the test monitor. 
 
@@ -82,6 +82,7 @@ An important piece of information MonitorMgmt will need to store in memory is th
 This is a new "EnvoyInstruction" message that will be added to the Telemetry Edge protobuf schema. It borrows heavily from the existing structure of the `EnvoyInstructionConfigure` since it needs to convey the same level of detail to configure the telegraf plugin.
 
 - correlation ID
+- agent type
 - monitor config JSON
 
 ### Post test-monitor results
@@ -89,12 +90,12 @@ This is a new "EnvoyInstruction" message that will be added to the Telemetry Edg
 This is request body of a new gRPC method of the `TelemetryAmbassador` service schema:
 
 - correlation ID
-- error message, if not fully successful
-- `Metric`, specifically a `NameTagValueMetric`
+- error messages, if not fully successful
+- `Metric`s, specifically `NameTagValueMetric`s
 
 ### Event: test-monitor results
 - correlation ID
 - tenant ID
 - resource ID
-- error message, if not fully successful
-- unified metrics object, if successful
+- error messages, if not fully successful
+- unified metrics objects, if successful

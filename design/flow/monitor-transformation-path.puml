@@ -1,0 +1,16 @@
+@startuml
+title Conversion flow of monitor data model
+footer As of Aug 2019
+
+hide empty members
+set namespaceSeparator none
+
+DetailedMonitorInput ..> MonitorCU : by MonitorConversionService
+MonitorCU ..> Monitor : by MonitorManagement
+Monitor ..> DetailedMonitorOutput : by MonitorConversionService
+Monitor ..> BoundMonitor : by MonitorManagement\nassisted by MonitorContentRenderer
+BoundMonitor ..> BoundMonitorDTO : by BoundMonitorDTO\nvia MonitorApiController
+BoundMonitorDTO ..> EnvoyInstructionConfigure : by ConfigInstructionsBuilder
+BoundMonitorDTO ..> EnvoyRegistry.BoundMonitorEntry : by EnvoyRegistry
+
+@enduml

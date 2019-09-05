@@ -1,0 +1,47 @@
+@startuml
+title
+ Agent-Version Monitor Translation
+ relative to existing processing
+end title
+
+actor User
+participant ACM
+collections UMB
+participant Ambassador
+participant Envoy
+participant MM
+database DB
+
+== agent install initiated ==
+
+alt agent install initiated
+  alt
+  User -> ACM : install agent release
+  else envoy-resource matches existing agent install selector
+  UMB -\ ACM : resource change event
+  end
+  ACM -\ UMB : AgentInstallChangeEvent
+  UMB -\ Ambassador : consume\n[if envoy bound]
+  Ambassador -> Ambassador : track agent-version
+  Ambassador -> Envoy : send install instruction
+else monitor initiated
+  UMB -\ Ambassador : consume\nMonitorBoundEvent
+end
+
+
+Ambassador -> MM ++ : get monitors bound to envoy\ngiven agent-version
+note left: New to feature
+
+MM -> DB : query\nbound monitors
+MM -> DB : query\napplicable translation operations
+note left: New to feature
+MM -> MM : agent-version content translation
+note left: New to feature
+return bound monitor DTOs
+
+Ambassador -> Ambassador : compute new config instructions
+Ambassador -> Envoy : send config instructions
+
+== monitor initiated ==
+
+@enduml

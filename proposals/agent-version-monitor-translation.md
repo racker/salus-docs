@@ -25,9 +25,12 @@ So, rather than hardcoding the translation logic, a "table driven" approach shou
 
 Some translation operations known from looking at deprecation notices in telegraf 1.12:
 - renaming of a field. _This is also useful to avoid exposing inconsistent word-break styles in plugins, such as the Telegraf CPU plugin's `percpu` vs `collect_cpu_time` fields._
+    - `parse_data_dog_tags` of [statsd](https://github.com/influxdata/telegraf/blob/72c2ac964875202f1c7d5d3e751e1464af04d719/plugins/inputs/statsd/README.md)
 - converting separate host and port fields into a URL field
+    - `url` of [activemq](https://github.com/influxdata/telegraf/blob/130c5c5f12f85a62df7841f19632d3d8d2286a7b/plugins/inputs/activemq/README.md)
 - converting a scalar string field into another field as array of strings
-- converting a host:port field into two separate fields
+    - `directory` of [filecount](https://github.com/influxdata/telegraf/blob/9740e956ca3176774ae23a312e5d498f4c20ef5a/plugins/inputs/filecount/README.md)
+    - `url` of [amqp_consumer](https://github.com/influxdata/telegraf/blob/e141518cf05177ef0f6a8efb3608ec0c1acbf49f/plugins/inputs/amqp_consumer/README.md)
 
 Additional operations we would want:
 - restrict allowed values of a field, such as only allowing "localhost" for SNMP input plugin
@@ -35,6 +38,40 @@ Additional operations we would want:
 - mapping `MonitorType` name to telegraf input plugin name
 
 **NOTE** while investigating deprecated telegraf config fields it was observed that metric fields are also deprecated at times. The occurrence of those seems to be very small, but non-zero. This is something that should be further considered at a later time.
+
+Since each translation operation requires specific parameters and there will likely be future operations with varying requirements, the plan is encode and persist each operation's definition as a JSON object structure. Similar to `MonitorDetails` the operations can be a polymorphic data model using a `operation` field as a discriminator. Most of the operations would also require a `plugin` field to target the plugin configuration that requires that translation operation.
+
+It is worth clarifying that each operation type would require a small amount of implementation -- this slightly contradicts the hardcoding avoidance stated earlier, but the alternative would require a heavier solution such as [jackson-jq](https://github.com/eiiches/jackson-jq) to fully script the operations. An implementation per operation type is a reasonable compromise since the addition of operation types would be infrequent.
+
+The following are some **examples** of operation definitions in JSON form:
+
+```json
+{
+  "operation": "rename_monitor_type",
+  "monitor_type": "tls",
+  "to_plugin": "x509_cert"
+}
+```
+
+```json
+{
+  "operation": "rename_field",
+  "plugin": "statsd",
+  "from": "parse_data_dog_tags",
+  "to": "datadog_extensions"
+}
+```
+
+```json
+{
+  "operation": "convert_host_and_port_to_url",
+  "plugin": "activemq",
+  "host_field": "server",
+  "port_field": "port",
+  "to": "url",
+  "scheme": "http"
+}
+```
 
 The sections above decided agent-version translation should occur when the the Ambassador is forming a configuration instruction; however, it wasn't yet decided where the translation rules should be stored and what microservice should own the execution of those rules. It turns out that when the Ambassador handles a monitor bound event it queries Monitor Management for the bound monitor DTOs. The bound monitor **DTO** is already a flattened representation of a bound monitor entity and its associated monitor entity. The bound monitor DTO's content field is currently populated from the persisted, rendered content field of the bound monitor entity.
 

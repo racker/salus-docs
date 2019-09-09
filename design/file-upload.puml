@@ -1,6 +1,6 @@
 @startuml
 
-title Monitor File Upload/Delete
+title Monitor/Resource File Upload/Delete
 
 actor User
 participant MonitorMgmt as MM

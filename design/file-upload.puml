@@ -1,23 +1,21 @@
 @startuml
 
-title Monitor File Upload
+title Monitor File Upload/Delete
 
 actor User
-participant PublicAPI
 participant MonitorMgmt as MM
-participant DB
+database DB
 participant Ambassador as Amb
 participant Envoy
-participant Telegraf
 
-User -> PublicAPI: POST Monitor with file
-PublicAPI -> MM: POST Monitor with file
-MM -> DB: saves file as mediumblob in monitor table, creates bound monitor with hashes, renders template variables
-MM -> AMB: bound monitor event
-DB -> AMB: get bound monitor with hashes
-AMB -> Envoy: send config op with hashes
-Envoy -> AMB: if hashes dont match, request new zipfiles
-AMB -> Envoy: send zip files
+
+User -> MM: POST Monitor with file
+MM -> DB: saves file as mediumblob, creates bm with hashes, renders template vars
+MM -> Amb: bound monitor event
+DB -> Amb: get bound monitor with hashes
+Amb -> Envoy: send config op with hashes
+Envoy -> Amb: if hashes dont match, request new zipfiles
+Amb -> Envoy: send zip files
 Envoy -> Envoy: unzip files
 
 @enduml

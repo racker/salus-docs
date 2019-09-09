@@ -14,7 +14,7 @@ participant Envoy
 User -> MM: POST Monitor with file
 MM -> DB: saves file as mediumblob, creates bm with hashes, renders template vars
 MM -> Amb: bound monitor event
-DB -> Amb: get bound monitor with hashes
+DB <- Amb: get bound monitor with hashes
 Amb -> Envoy: send config op with hashes
 Envoy -> Amb: if hashes dont match, request new zipfiles
 Amb -> Envoy: send zip files

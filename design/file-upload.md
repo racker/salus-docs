@@ -36,3 +36,7 @@ We will want to limit the size of these files.  I think a megabyte should be eno
 
 ## Deletion
 When the configuration op is a delete, the envoy will delete the corresponding directories.
+
+
+## Diagram
+[Diagram](file-upload.puml).

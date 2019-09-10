@@ -14,9 +14,10 @@ participant Envoy
 User -> MM: POST Monitor with file
 MM -> DB: saves file as mediumblob, creates bm with hashes, renders template vars
 MM -> Amb: bound monitor event
-DB <- Amb: get bound monitor with hashes
+Amb -> MM: get bound monitor with hashes
 Amb -> Envoy: send config op with hashes
 Envoy -> Amb: if hashes dont match, request new zipfiles
+Amb -> MM: get the zip files from the db
 Amb -> Envoy: send zip files
 Envoy -> Envoy: unzip files
 
@@ -26,7 +27,7 @@ User -> MM: Delete Monitor with file
 MM -> DB: deletes monitor/bm's
 MM -> Amb: bound monitor event
 Amb -> Envoy: send delete config op
-Envoy -> Envoy: delete files
+Envoy -> Envoy: delete files, if no other bound monitors are using them.
 
 
 == User requests Resource with File upload ==

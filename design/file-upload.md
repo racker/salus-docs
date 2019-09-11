@@ -24,9 +24,9 @@ This will probably require a new "GetFile" rpc call on the server.  This new cal
 To prevent collisions with files from other monitors/resources, the envoy will have to unzip these files in directories whose names are based on the tenant/monitor/resource id.  
 
 ## Template Variables
-In addition, we will need a template variable that users can use in their configs to point to the directory, something like "{{monitor-data-dir}}", or "{{resource-data-dir}}".  They will use that template when specifying their config.  For example, the mysql config has a field called "tls_ca".  In order to point to the unzipped, uploaded files, they would specify something like:
+In addition, we will need a template variable that users can use in their configs to point to the directory, something like "{{monitor_data_dir}}", or "{{resource_data_dir}}".  They will use that template when specifying their config.  For example, the mysql config has a field called "tls_ca".  In order to point to the unzipped, uploaded files, they would specify something like:
 ```
-"tls_ca"": "{{monitor-data-dir}}/telegraf/ca.pem"
+"tls_ca"": "{{monitor_data_dir}}/telegraf/ca.pem"
 ```
 
 The content rendering code will also need to be updated to support these new template variables.
@@ -35,7 +35,7 @@ Note that the Envoy sets the working directory of the agent (such as telegraf) t
 
 https://github.com/racker/salus-telemetry-envoy/blob/4b5d657611926c3ca06f45da63ea0c93de44d42e/agents/agents_router.go#L57-L60
 
-so the {{monitor-data-dir}}, etc can be reliably computed as a relative directory at content rendering time.  The layout should be something like './monitor-files/<monitor-id>/'
+so the {{monitor_data_dir}}, etc can be reliably computed as a relative directory at content rendering time.  The layout should be something like './monitor-files/<monitor-id>/'
 
 
 
@@ -43,7 +43,7 @@ so the {{monitor-data-dir}}, etc can be reliably computed as a relative director
 We will want to limit the size of these files to 1 mb; the api should validate this.
 
 ## Deletion
-When the configuration op is a delete, the envoy will delete the corresponding monitor-data-dir, if no longer in use.  NOTE: there may be other boundmonitors still using the files, so only delete the files when the last corresponding boundmonitor is gone.
+When the configuration op is a delete, the envoy will delete the corresponding monitor_data_dir, if no longer in use.  NOTE: there may be other boundmonitors still using the files, so only delete the files when the last corresponding boundmonitor is gone.
 
 
 ## Diagram

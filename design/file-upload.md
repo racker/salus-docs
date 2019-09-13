@@ -26,7 +26,7 @@ To prevent collisions with files from other monitors/resources, the envoy will h
 ## Template Variables
 In addition, we will need a template variable that users can use in their configs to point to the directory, something like "{{monitor_data_dir}}", or "{{resource_data_dir}}".  They will use that template when specifying their config.  For example, the mysql config has a field called "tls_ca".  In order to point to the unzipped, uploaded files, they would specify something like:
 ```
-"tls_ca"": "{{monitor_data_dir}}/telegraf/ca.pem"
+"tls_ca": "{{monitor_data_dir}}/telegraf/ca.pem"
 ```
 
 The content rendering code will also need to be updated to support these new template variables.

@@ -46,5 +46,11 @@ We will want to limit the size of these files to 1 mb; the api should validate t
 When the configuration op is a delete, the envoy will delete the corresponding monitor_data_dir, if no longer in use.  NOTE: there may be other boundmonitors still using the files, so only delete the files when the last corresponding boundmonitor is gone.
 
 
+Each time the Envoy recieves a set of configs, it will track the monitor id's of each in a set, and compares the existing monitor directories against that set, removing any that don't exist in the set.
+
+We could also remove the entire set of directories when the envoy detaches, but since those are likely to be temporary, it may make more sense to just allow the mechanism above to work during a re-attach.
+
+
+
 ## Diagram
 [Diagram](file-upload.puml).

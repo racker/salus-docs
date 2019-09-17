@@ -36,6 +36,7 @@ Additional operations we would want:
 - restrict allowed values of a field, such as only allowing "localhost" for SNMP input plugin
 - populate fixed values, such as `metric_version = 2` of [the mysql plugin](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/mysql#metric-version)
 - mapping `MonitorType` name to telegraf input plugin name
+- given a template string, populate it with one or more values from the normalized config content. For example, could use a template like `tcp(127.0.0.1:${port})/` to populate the `servers` field of [the mysql plugin](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/mysql#configuration). There would need to be a translation operation parameter to indicate if the original fields should be retained
 
 **NOTE** while investigating deprecated telegraf config fields it was observed that metric fields are also deprecated at times. The occurrence of those seems to be very small, but non-zero. This is something that should be further considered at a later time.
 

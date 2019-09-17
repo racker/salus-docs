@@ -1,5 +1,5 @@
 
-# Agent-Version Monitor Translation
+# Monitor Translation for agent-version portability
 
 ## Background
 
@@ -11,7 +11,7 @@ That becomes a risky assumption since a newer version of telegraf may decide to 
 
 ## Design Proposal
 
-> A [sequence diagram is provided](agent-version-monitor-translation-seq.puml), which might be more helpful to view after reading the proposal below
+> A [sequence diagram is provided](monitor-translation-seq.puml), which might be more helpful to view after reading the proposal below
 
 A given tenant might have several versions of telegraf in use across their fleet depending on how granular the agent install selectors were chosen. Therefore, assumptions cannot be made at a tenant-level about what version of a particular agent is in use. As such, monitor translation (which is different from "conversion", described above) is not practical at the time of monitor creation, updates, and bindings since the agent-install lifecycle transitions independently of the monitor lifecycle. 
 
@@ -34,7 +34,7 @@ Some translation operations known from looking at deprecation notices in telegra
 
 Additional operations we would want:
 - restrict allowed values of a field, such as only allowing "localhost" for SNMP input plugin
-- populate fixed values
+- populate fixed values, such as `metric_version = 2` of [the mysql plugin](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/mysql#metric-version)
 - mapping `MonitorType` name to telegraf input plugin name
 
 **NOTE** while investigating deprecated telegraf config fields it was observed that metric fields are also deprecated at times. The occurrence of those seems to be very small, but non-zero. This is something that should be further considered at a later time.

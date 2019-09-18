@@ -1,0 +1,48 @@
+@startuml
+
+title Monitor/Resource File Upload/Delete
+
+actor User
+participant MonitorMgmt as MM
+participant ResourceMgmt as RM
+database DB
+participant Ambassador as Amb
+participant Envoy
+
+== User requests Monitor with File upload ==
+
+User -> MM: POST Monitor with file
+MM -> DB: saves file as mediumblob, creates bm with hashes, renders template vars
+MM -> Amb: bound monitor event
+Amb -> MM: get bound monitor with hashes
+Amb -> Envoy: send config op with hashes
+Envoy -> Amb: if hashes dont match, request new zipfiles
+Amb -> MM: get the zip files from the db
+Amb -> Envoy: send zip files
+Envoy -> Envoy: unzip files
+
+== User deletes Monitor with File ==
+
+User -> MM: Delete Monitor with file
+MM -> DB: deletes monitor/bm's
+MM -> Amb: bound monitor event
+Amb -> Envoy: send delete config op
+Envoy -> Envoy: delete files, if no other bound monitors are using them.
+
+
+== User requests Resource with File upload ==
+
+User -> RM: POST Resource with file
+RM -> DB: saves file as mediumblob in resource table
+RM -> MM: resource event
+MM -> DB: creates bm with hashes, renders template vars, then same as monitor upload
+
+== User deletes Resource with File ==
+
+User -> RM: Deletes Resource with file
+RM -> DB: deletes resource
+RM -> MM: resource event
+MM -> DB: deletes bm's, then same as monitor delete
+
+
+@enduml

@@ -1,6 +1,6 @@
 @startuml
 
-title End to End Test/Incomplete but sufficient to show full coverage
+title End to End Test/Doesn't show api interactions
 
 actor endToEndTest as e2et
 participant envoy as en

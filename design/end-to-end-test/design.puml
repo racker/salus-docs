@@ -1,0 +1,46 @@
+e@startuml
+
+title End to End Test/Incomplete but sufficient to show full coverage
+
+actor endToEndTest as e2et
+participant envoy as en
+participant authService as auth
+participant ambassador as amb
+participant monitorMgmt as mm
+participant resourceMgmt as rm
+database kafka
+participant etcd
+participant zoneWatcher as zw
+participant presenceMonitor as preM
+participant policyMgmt as polM
+participant agentCatalogMgmt as acm
+participant eventEngineMgmt as eem
+participant eventEngineIngest as eei
+participant kapacitor as kap
+
+
+e2et -> en: start envoy
+en -> auth: req certs
+en -> amb: attach
+amb -> etcd: record envoy
+etcd -> zw: new envoy
+zw -> mm: envoy available
+amb -> rm: new resource
+rm -> preM: new resource
+preM -> kafka: new envoy event
+e2et -> acm: create release
+acm -> amb: new release
+amb -> en: new release
+e2et -> eem: new tasks
+eem -> kap: new tasks
+e2et -> polM: new policy
+e2et -> mm: new monitors
+polM -> mm: new policy
+mm -> amb: new bound monitors
+amb -> en: new bound monitors
+en -> kafka: failed metrics
+kafka -> eei: failed metrics
+eei -> kap: failed metrics
+kap -> kafka: failed events
+
+@enduml

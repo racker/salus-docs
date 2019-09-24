@@ -3,7 +3,7 @@
 title End to End Test/Doesn't show api interactions
 
 actor endToEndTest as e2et
-participant envoy as en
+participant privatePoller as en
 participant authService as auth
 participant ambassador as amb
 participant monitorMgmt as mm
@@ -11,6 +11,7 @@ participant resourceMgmt as rm
 database kafka
 participant etcd
 participant zoneWatcher as zw
+participant publicPoller as pubP
 participant presenceMonitor as preM
 participant policyMgmt as polM
 participant agentCatalogMgmt as acm
@@ -34,11 +35,13 @@ amb -> en: new release
 e2et -> eem: new tasks
 eem -> kap: new tasks
 e2et -> polM: new policy
-e2et -> mm: new monitors
 polM -> mm: new policy
+e2et -> mm: new monitors
 mm -> amb: new bound monitors
-amb -> en: new bound monitors
+amb -> en: new bound monitor
 en -> kafka: failed metrics
+amb -> pubP: new bound monitor
+pubP -> kafka: failed metrics
 kafka -> eei: failed metrics
 eei -> kap: failed metrics
 kap -> kafka: failed events

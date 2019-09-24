@@ -7,14 +7,14 @@ In addition, e2et will also require access to an admin tenant.  That one need no
 
 An overview of the test is shown here: [Diagram](diagram.puml)
 
-# cleanup/init
+# initialization
 Note all of the following are done through the corresponding rest api's.
 1. get tokens for regular and admin users from identity.
 1. get all agent releases, if no valid one exists, create one.
 1. delete all existing private zones for tenant; create a new private zone, with a random id.
 1. remove all existing resources for the tenant.
 1. remove all existing monitors/policy monitors for tenant
-# run
+# implementation
 ## required implementation
 1. start searching kafka for a new envoy event from presence monitor, (envoy will be created below.)
 1. as a child process of e2et, start up envoy; configure it with private zone created above and a new random resource id.

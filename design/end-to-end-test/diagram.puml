@@ -29,9 +29,9 @@ zw -> mm: envoy available
 amb -> rm: new resource
 rm -> preM: new resource
 preM -> kafka: new envoy event
-e2et -> acm: create release
-acm -> amb: new release
-amb -> en: new release
+e2et -> acm: create install
+acm -> amb: new install
+amb -> en: new install
 e2et -> eem: new tasks
 eem -> kap: new tasks
 e2et -> polM: new policy

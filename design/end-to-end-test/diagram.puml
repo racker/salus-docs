@@ -1,0 +1,49 @@
+@startuml
+
+title End to End Test/Doesn't show api interactions
+
+actor endToEndTest as e2et
+participant privatePoller as en
+participant authService as auth
+participant ambassador as amb
+participant monitorMgmt as mm
+participant resourceMgmt as rm
+database kafka
+participant etcd
+participant zoneWatcher as zw
+participant publicPoller as pubP
+participant presenceMonitor as preM
+participant policyMgmt as polM
+participant agentCatalogMgmt as acm
+participant eventEngineMgmt as eem
+participant eventEngineIngest as eei
+participant kapacitor as kap
+
+
+e2et -> en: start envoy
+en -> auth: req certs
+en -> amb: attach
+amb -> etcd: record envoy
+etcd -> zw: new envoy
+zw -> mm: envoy available
+amb -> rm: new resource
+rm -> preM: new resource
+preM -> kafka: new envoy event
+e2et -> acm: create install
+acm -> amb: new install
+amb -> en: new install
+e2et -> eem: new tasks
+eem -> kap: new tasks
+e2et -> polM: new policy
+polM -> mm: new policy
+e2et -> mm: new monitors
+mm -> amb: new bound monitors
+amb -> en: new bound monitor
+en -> kafka: failed metrics
+amb -> pubP: new bound monitor
+pubP -> kafka: failed metrics
+kafka -> eei: failed metrics
+eei -> kap: failed metrics
+kap -> kafka: failed events
+
+@enduml

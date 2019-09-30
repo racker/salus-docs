@@ -40,7 +40,7 @@ Additional operations we would want:
 
 **NOTE** while investigating deprecated telegraf config fields it was observed that metric fields are also deprecated at times. The occurrence of those seems to be very small, but non-zero. This is something that should be further considered at a later time.
 
-Since each translation operation requires specific parameters and there will likely be future operations with varying requirements, the plan is encode and persist each operation's definition as a JSON object structure. Similar to `MonitorDetails` the operations can be a polymorphic data model using a `operation` field as a discriminator. Most of the operations would also require a `plugin` field to target the plugin configuration that requires that translation operation.
+Since each translation operation requires specific parameters and there will likely be future operations with varying requirements, the plan is encode and persist each operation's definition as a JSON object structure. Similar to `MonitorDetails` the operations can be a polymorphic data model using a `type` field as a discriminator.
 
 It is worth clarifying that each operation type would require a small amount of implementation -- this slightly contradicts the hardcoding avoidance stated earlier, but the alternative would require a heavier solution such as [jackson-jq](https://github.com/eiiches/jackson-jq) to fully script the operations. An implementation per operation type is a reasonable compromise since the addition of operation types would be infrequent.
 
@@ -48,7 +48,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "rename_monitor_type",
+  "type": "rename_monitor_type",
   "monitor_type": "tls",
   "to_plugin": "x509_cert"
 }
@@ -56,7 +56,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "rename_field",
+  "type": "rename_field",
   "plugin": "statsd",
   "from": "parse_data_dog_tags",
   "to": "datadog_extensions"
@@ -65,7 +65,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "convert_host_and_port_to_url",
+  "type": "convert_host_and_port_to_url",
   "plugin": "activemq",
   "host_field": "server",
   "port_field": "port",
@@ -81,6 +81,12 @@ The current design proposes that when the Ambassador queries Monitor Management 
 The previous paragraph implies that Monitor Management becomes the microservice that owns management and persistence of the monitor translation operations. It also becomes the endpoint for admin APIs to manage the translation operations. The downside to this approach is that the Monitor Management microservice would need to take on even more responsibility and it already has many; however, at the broader system level, this approach avoids introducing any new dependencies, applications, or communication paths. Introductions to the bulk and complexity of the `MonitorManagement` Spring component could be minimized and a new Spring component can encapsulate a majority of the new translation logic.
 
 With all of the pieces above, the Ambassador's processing of agent install events can be enhanced to handle potential re-translation of monitors previously bound to the attached envoy. That enhancement turns out to be quite simple since it can initiate the same processing flow as handling of a bound monitor event. Specifically, the same query for bound monitor DTOs would be invoked, this time with the newly installed agent type and version, the translated monitor content would come back, and the Ambassador's `EnvoyRegistry` can compute necessary configuration instructions as it does already.
+
+## Glossary
+
+- **monitor translation operator** : is the term for the persisted entity class. It identifies the applicable agent type and optionally applicable version ranges, monitor type, and/or selector scope. It also includes a JSON object that conveys the "specifics" of the translation...
+- **translator spec** : a JSON object serialized as a string when persisted that is deserialized into a sub-class of `MonitorTranslator`
+- **translator** : using the properties of the specification, performs a translation of a given JSON object tree, which has been deserialized from a bound monitor's rendered content
 
 ## Open questions
 

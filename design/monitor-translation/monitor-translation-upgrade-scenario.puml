@@ -1,0 +1,33 @@
+@startuml
+
+actor Admin
+participant MM
+participant Ambassador
+participant Envoy
+participant telegraf11
+participant telegraf12
+participant UMB
+participant ACM
+actor User
+
+activate telegraf11
+
+Admin -> MM : create\nmonitor translation operator\nfor telegraf 1.12
+|||
+User -> ACM : change agent install\nto telegraf 1.12
+ACM -> UMB : AgentInstallChangeEvent
+UMB -> Ambassador ++ : consume AgentInstallChangeEvent
+Ambassador -> Envoy ++ : agent install instruction for telegraf 1.12
+Envoy -> telegraf11 !! : stop
+Envoy -> telegraf12 ** : install and start
+activate telegraf12
+deactivate Envoy
+
+Ambassador -> MM : get and translate\nbound monitors
+Ambassador -> Envoy ++ : send updated config instructions
+Envoy -> Envoy : update config map
+Envoy -> telegraf12 : reload config
+telegraf12 -> Envoy : retrieve config over HTTP
+deactivate Envoy
+
+@enduml

@@ -17,7 +17,7 @@ A given tenant might have several versions of telegraf in use across their fleet
 
 Envoy is the only part of the current system that has a concrete need to comprehend telegraf and its configuration format. Logically that would be the place where the content blob should be translated into a version specific form of telegraf configuration; however, we need the Envoy to be a slowly changing codebase. Deploying new versions of Envoy across a large set of resources across all tenants is not expected nor desired to be a common activity.
 
-Currently, the Ambassador has indirect knowledge of what agents and what version of those agents are installed on a currently attached Envoy since it is the one that forms an agent install instruction while consuming an agent install change event; however, it doesn't currently persist those details after the instruction is sent. The Ambassador could be enhanced to track the agent types and agent versions in the `EnvoyRegistry` much like the bound monitor tracking. It could then use that tracked knowledge to facilitate agent/version specific transformations of the monitor content while building the respective config instruction. So, Ambassador seems to be an ideal step in the [monitor transformation path](../design/flow/monitor-transformation-path.puml) to initiate the agent-version specific translation of monitor content.
+Currently, the Ambassador has indirect knowledge of what agents and what version of those agents are installed on a currently attached Envoy since it is the one that forms an agent install instruction while consuming an agent install change event; however, it doesn't currently persist those details after the instruction is sent. The Ambassador could be enhanced to track the agent types and agent versions in the `EnvoyRegistry` much like the bound monitor tracking. It could then use that tracked knowledge to facilitate agent/version specific transformations of the monitor content while building the respective config instruction. So, Ambassador seems to be an ideal step in the [monitor transformation path](../flow/monitor-transformation-path.puml) to initiate the agent-version specific translation of monitor content.
 
 Similar to the comment about not wanting to modify the Envoy codebase frequently we should likewise try to avoid writing hardcoded logic that translates the monitor JSON content blobs into an agent-version specific configuration blob. For example, if it were hardcoded into the Ambassadors, then each new version of telegraf introduced into the system would require a re-deployment of Ambassadors. While that is much more feasible than redeploying Envoys, it is not a scalable/prudent reason for continuous re-deployments.
 
@@ -40,7 +40,7 @@ Additional operations we would want:
 
 **NOTE** while investigating deprecated telegraf config fields it was observed that metric fields are also deprecated at times. The occurrence of those seems to be very small, but non-zero. This is something that should be further considered at a later time.
 
-Since each translation operation requires specific parameters and there will likely be future operations with varying requirements, the plan is encode and persist each operation's definition as a JSON object structure. Similar to `MonitorDetails` the operations can be a polymorphic data model using a `operation` field as a discriminator. Most of the operations would also require a `plugin` field to target the plugin configuration that requires that translation operation.
+Since each translation operation requires specific parameters and there will likely be future operations with varying requirements, the plan is encode and persist each operation's definition as a JSON object structure. Similar to `MonitorDetails` the operations can be a polymorphic data model using a `type` field as a discriminator.
 
 It is worth clarifying that each operation type would require a small amount of implementation -- this slightly contradicts the hardcoding avoidance stated earlier, but the alternative would require a heavier solution such as [jackson-jq](https://github.com/eiiches/jackson-jq) to fully script the operations. An implementation per operation type is a reasonable compromise since the addition of operation types would be infrequent.
 
@@ -48,7 +48,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "rename_monitor_type",
+  "type": "rename_monitor_type",
   "monitor_type": "tls",
   "to_plugin": "x509_cert"
 }
@@ -56,7 +56,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "rename_field",
+  "type": "rename_field",
   "plugin": "statsd",
   "from": "parse_data_dog_tags",
   "to": "datadog_extensions"
@@ -65,7 +65,7 @@ The following are some **examples** of operation definitions in JSON form:
 
 ```json
 {
-  "operation": "convert_host_and_port_to_url",
+  "type": "convert_host_and_port_to_url",
   "plugin": "activemq",
   "host_field": "server",
   "port_field": "port",
@@ -81,6 +81,12 @@ The current design proposes that when the Ambassador queries Monitor Management 
 The previous paragraph implies that Monitor Management becomes the microservice that owns management and persistence of the monitor translation operations. It also becomes the endpoint for admin APIs to manage the translation operations. The downside to this approach is that the Monitor Management microservice would need to take on even more responsibility and it already has many; however, at the broader system level, this approach avoids introducing any new dependencies, applications, or communication paths. Introductions to the bulk and complexity of the `MonitorManagement` Spring component could be minimized and a new Spring component can encapsulate a majority of the new translation logic.
 
 With all of the pieces above, the Ambassador's processing of agent install events can be enhanced to handle potential re-translation of monitors previously bound to the attached envoy. That enhancement turns out to be quite simple since it can initiate the same processing flow as handling of a bound monitor event. Specifically, the same query for bound monitor DTOs would be invoked, this time with the newly installed agent type and version, the translated monitor content would come back, and the Ambassador's `EnvoyRegistry` can compute necessary configuration instructions as it does already.
+
+## Glossary
+
+- **monitor translation operator** : is the term for the persisted entity class. It identifies the applicable agent type and optionally applicable version ranges, monitor type, and/or selector scope. It also includes a JSON object that conveys the "specifics" of the translation...
+- **translator spec** : a JSON object serialized as a string when persisted that is deserialized into a sub-class of `MonitorTranslator`
+- **translator** : using the properties of the specification, performs a translation of a given JSON object tree, which has been deserialized from a bound monitor's rendered content
 
 ## Open questions
 

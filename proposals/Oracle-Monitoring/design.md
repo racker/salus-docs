@@ -2,7 +2,7 @@
 Rackspace appears to only have Managed Oracle customers, which puts a completely different spin on our approach to this.
 Since we can rely on managed Oracle hosting we can make similar requirements of the DBA's to what EM7 has had.
 
-In a different vein we are going to approach this from a different paradigm to the rest of our system.
+We are going to approach this from a different paradigm to the rest of our system.
 EM7 has alarm criteria in the configuration happening on the server itself. We don't need to send true/false
 through our system but it does make sense in some of these cases to massage the data a bit more than normal
 on the server side (otherwise part of this turns into log monitoring).
@@ -26,25 +26,25 @@ Note that the EM7 configurations list stores the alarming criteria in its config
 
 ###Proposed Salus monitoring
 We would send one metric that is just the log file age.
-Another metric we would send would be a sort of log file monitoring. We would read in the log file and search
-for any error codes of the form RMAN-##### or ORA-##### while ignoring any of the codes in the exclusion
-list. This metric would end up being a boolean. True means there were no errors and false means it found an error. 
+Another metric we would send would be a sort of log file monitoring. We would read in the log file 
+(while storing the position we are in the log file) and search for any error codes of the form 
+RMAN-##### or ORA-##### while ignoring any of the codes in the exclusion list. This metric would end 
+up being a boolean. True means there were no errors and false means it found an error. 
 
 Monitor:
    * List of DB Name's
    * List of error codes we can safely ignore
    * log file path
-   * Metadata:
-        * log file path 
 
 
 Alarm:
    * log file age
+   * true/false for error codes
 
 
 ##Tablespace Usage
 DBA's setup an export script for this that outputs the following: 
-File contents are currently in the current format
+File contents are currently in this format
 TABLESPACE_NAME : CURRENT USAGE % : WARNING% : CRITICAL%  
 
 For a particular database each table will have its own line in the log file.
@@ -67,8 +67,6 @@ Alarmm:
    * critical %
     
     
-    
-    
 ##Dataguard Replication 
 Dataguard replication for EM7 is an output file with a single line.
 
@@ -78,9 +76,9 @@ For Salus I think that we can look at what the DBA's have setup and directly pol
 DATABASE : CODE : REPORT FILE : ? : WARNING : CRITICAL 
     
 If report file does not exist, error 
-o Open report file and read current value. 
-o If current value > warning, raise warning 
-o If current value > critical, raise critical. 
+ * Open report file and read current value. 
+ * If current value > warning, raise warning 
+ * If current value > critical, raise critical. 
 
 
 ###Proposed Salus monitoring

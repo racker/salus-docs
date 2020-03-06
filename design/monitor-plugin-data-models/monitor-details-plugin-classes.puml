@@ -1,0 +1,26 @@
+@startuml
+
+hide empty members
+
+class DetailedMonitorInput
+
+abstract class MonitorDetails
+class LocalMonitorDetails
+class RemoteMonitorDetails {
+  List<String> monitoringZones
+}
+
+abstract class LocalPlugin
+abstract class RemotePlugin
+
+DetailedMonitorInput *-- MonitorDetails
+MonitorDetails <|-- LocalMonitorDetails
+MonitorDetails <|-- RemoteMonitorDetails
+
+LocalMonitorDetails *-- LocalPlugin
+RemoteMonitorDetails *-- RemotePlugin
+
+LocalPlugin <|-- "Cpu, etc"
+RemotePlugin <|-- "Ping, etc"
+
+@enduml

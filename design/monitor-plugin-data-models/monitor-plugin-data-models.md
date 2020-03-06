@@ -8,7 +8,7 @@ For example, the name and label selectors of a monitor are applicable for every 
 
 The Spring Web MVC controller handlers that service the Salus API to create or modify monitors map and validate JSON request bodies to the Java data model classes declared in `com.rackspace.salus.monitor_management.web.model`. The following diagram provides an overview of the relevant, "user facing" classes in that package:
 
-![monitor-details-plugin-classes.puml](https://github.com/racker/salus-docs/raw/master/design/monitor-plugin-data-models/monitor-details-plugin-classes.puml)
+![monitor-details-plugin-classes.puml](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://github.com/racker/salus-docs/raw/master/design/monitor-plugin-data-models/monitor-details-plugin-classes.puml)
 
 ## Local and Remote Model Grouping
 

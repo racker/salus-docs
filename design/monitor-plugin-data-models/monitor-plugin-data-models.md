@@ -49,7 +49,6 @@ Since the set of monitoring agents supported by Salus may gradually grow over ti
 9. Apply field defaults for cases where the "zero-value" is not the desired default value
    1. Declare a field initializer, such as `boolean totalcpu = true`
    2. Add `@JsonProperty(defaultValue = "...")`
-   3. Similarly, add `@JsonSchemaDefault("...")` to satisfy the generated JSON schema
    
 ## Notes on JSON Schema Generation
 

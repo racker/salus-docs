@@ -41,6 +41,7 @@ Since the set of monitoring agents supported by Salus may gradually grow over ti
 5. It is somewhat redundant with the enclosing package, but the plugin class should be annotated with the Salus annotation `@ApplicableAgentType`, which is discussed in a previous section.
 6. The mapping of the plugin class to `MonitorType` should be declared with the Salus annotation `@ApplicableMonitorType`
 7. Each configurable aspect of the specific agent's implementation should be conveyed by one or more fields of the plugin class. In turn those fields can be processed by [monitor translation](https://github.com/racker/salus-docs/tree/master/design/monitor-translation); however, one to one mappings of fields are preferred when the name and meaning of the field makes sense for end users of Salus.
+   - **Note:** If policy metadata should be an option for the type, the object type should be used instead of a primitive so that null can be provided.
 8. Apply validation constraints, JSON declarations, and/or JSON schema declarations on fields, as needed. Since the monitor request body is processed by [Spring's bean validation](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#validation-beanvalidation), the fields can be declared with a combination of 
    - "javax.validation" (preferred)
    - hibernate-specific annotations

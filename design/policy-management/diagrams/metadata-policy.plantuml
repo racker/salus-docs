@@ -1,0 +1,41 @@
+@startuml
+
+title Sequence Diagram for new metadata policy change
+participant AdminApi
+participant PolicyMgmt
+participant MonitorMgmt
+
+group save updated policy
+AdminApi-->PolicyMgmt: Metadata Policy action
+PolicyMgmt-->PolicyMgmt: get Policy by Id
+PolicyMgmt-->PolicyMgmt: update and save Policy
+end
+
+group generate event for each tenant
+PolicyMgmt-->PolicyMgmt: get tenants in policy scope
+loop for each tenant
+   PolicyMgmt-->UMB: send MetadataPolicyEvent
+   note right
+     MetadataPolicyEvent
+     :tenantId
+     :policyId
+   end note
+end
+UMB-->MonitorMgmt: consume MetadataPolicyEvent
+end
+
+group update monitors with new value
+MonitorMgmt-->PolicyMgmt: Get effective metadata policies for tenant
+note right
+     Proceed only if policyId
+     is in effective list
+end note
+
+MonitorMgmt-->MonitorMgmt: Get all monitors using metadata field
+MonitorMgmt-->MonitorMgmt: Get all bound monitors in list of monitor ids
+MonitorMgmt-->MonitorMgmt: Update rendered content for each bound monitor
+
+MonitorMgmt-->UMB: send bind/unbind events
+end
+
+@enduml

@@ -1,0 +1,71 @@
+@startuml
+
+title Sequence Diagram for updating a monitor policy
+
+note left of AdminAPI #aqua
+Note: Only the scope of a monitor policy can be modified.
+
+The ability to update policies is required
+to ensure the monitor id on a tenant doesn't change
+just because the policy's scope was altered.
+If the tenant is no longer in the scope of the policy
+its monitor will be removed but for those who are still in scope,
+it is beneficial to keep the cloned monitor id consistent so
+that business processes relying on it can continue to work.
+
+There's a chance newer processes will not tie directly to
+the monitor id, but it's best to not rely on that assumption as long as
+this process doesn't add large amounts of complexity.
+end note
+
+participant AdminAPI
+participant MonitorMgmt
+participant PolicyMgmt
+
+AdminAPI-->PolicyMgmt: update Policy with new scope
+PolicyMgmt-->PolicyMgmt: save new Policy
+
+group generate event for each tenant
+PolicyMgmt-->PolicyMgmt: get tenants in old policy scope
+PolicyMgmt-->PolicyMgmt: get tenants in new policy scope
+loop for each unique tenant
+   PolicyMgmt-->UMB: send MonitorPolicyEvent
+   note right
+     MonitorPolicyEvent
+     :tenantId
+     :policyId
+     :monitorId
+   end note
+end
+UMB-->MonitorMgmt: consume MonitorPolicyEvent
+end
+
+group handleMonitorPolicyEvent
+MonitorMgmt-->PolicyMgmt: get effective policies for tenant
+MonitorMgmt-->MonitorMgmt: get monitor tied to policy monitor
+opt if policy is not in effect but monitor exists
+MonitorMgmt-->MonitorMgmt: remove bound monitors
+MonitorMgmt-->MonitorMgmt: remove monitor
+else if policy is in effect and monitor not found
+group clone monitor to new tenant
+MonitorMgmt-->MonitorMgmt: deep copy policy monitor
+MonitorMgmt-->MonitorMgmt: set new tenantId on monitor
+MonitorMgmt-->MonitorMgmt: set new policyId on monitor
+MonitorMgmt-->PolicyMgmt: get monitor metadata policies for tenant
+MonitorMgmt-->MonitorMgmt: update monitorMetadataFields
+MonitorMgmt-->PolicyMgmt: get plugin metadata policies for tenant
+MonitorMgmt-->MonitorMgmt: update pluginMetadataFields
+MonitorMgmt-->MonitorMgmt: save monitor with new id
+MonitorMgmt-->MonitorMgmt: bind monitor
+end
+else otherwiseno action is needed
+end
+MonitorMgmt-->UMB: send bind/unbind events
+end
+note right
+  This section is duplicated on a few
+  diagrams. If it changes, ensure all
+  are updated.
+end note
+
+@enduml

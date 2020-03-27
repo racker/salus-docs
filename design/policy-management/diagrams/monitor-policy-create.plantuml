@@ -1,0 +1,76 @@
+@startuml
+
+title Sequence Diagram for new monitor policy
+participant AdminApi
+participant PolicyMgmt
+participant MonitorMgmt
+
+group create new policy monitor
+AdminApi->MonitorMgmt: POST /policy-monitors
+note right
+// null params will use policy metadata
+{
+  "name": "ping",
+  "labelSelector": {},
+  "interval": null,
+  "labelSelectorMethod": null,
+  "details": {
+    "type": "remote",
+    "monitoringZones": null,
+    "plugin": {
+      "type": "ping",
+      "target": null
+    }
+  }
+}
+end note
+end
+
+group save new policy
+AdminApi-->PolicyMgmt: Monitor Policy action
+PolicyMgmt-->PolicyMgmt: save new policy
+end
+
+group generate event for each tenant
+PolicyMgmt-->PolicyMgmt: get tenants in policy scope
+loop for each tenant
+   PolicyMgmt-->UMB: send MonitorPolicyEvent
+   note right
+     MonitorPolicyEvent
+     :monitorId
+     :policyId
+     :tenantId
+   end note
+end
+UMB-->MonitorMgmt: consume MonitorPolicyEvent
+end
+
+group handleMonitorPolicyEvent
+MonitorMgmt-->PolicyMgmt: get effective policies for tenant
+MonitorMgmt-->MonitorMgmt: get monitor tied to policy monitor
+opt if policy is not in effect but monitor exists
+MonitorMgmt-->MonitorMgmt: remove bound monitors
+MonitorMgmt-->MonitorMgmt: remove monitor
+else if policy is in effect and monitor not found
+group clone monitor to new tenant
+MonitorMgmt-->MonitorMgmt: deep copy policy monitor
+MonitorMgmt-->MonitorMgmt: set new tenantId on monitor
+MonitorMgmt-->MonitorMgmt: set new policyId on monitor
+MonitorMgmt-->PolicyMgmt: get monitor metadata policies for tenant
+MonitorMgmt-->MonitorMgmt: update monitorMetadataFields
+MonitorMgmt-->PolicyMgmt: get plugin metadata policies for tenant
+MonitorMgmt-->MonitorMgmt: update pluginMetadataFields
+MonitorMgmt-->MonitorMgmt: save monitor with new id
+MonitorMgmt-->MonitorMgmt: bind monitor
+end
+else otherwiseno action is needed
+end
+MonitorMgmt-->UMB: send bind/unbind events
+end
+note right
+  This section is duplicated on a few
+  diagrams. If it changes, ensure all
+  are updated.
+end note
+@enduml
+

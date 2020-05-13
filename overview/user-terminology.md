@@ -32,7 +32,7 @@ Some of the common types are: Cpu, Disk, Memory, Ping, Http
 ### Local vs Remote Plugins
 Certain monitor plugins are "local".  This means they require an agent manager called the "Envoy" running on the resource. Local plugins are implemented by managed agents running on the server resource.  The Envoy gathers the metrics produced for those monitors.  The following are example local monitors: CPU, Disk, Memory
 
-Certain monitor plugins are remote.  This means they don't require an Envoy running on the resource.  The following are remote monitors: Ping, Http
+Certain monitor plugins are remote.  This means they don't require an Envoy running on the resource.  The following are example remote monitors: Ping, Http
 
 ## Envoy
 An Envoy is the process installed on a resource that accepts the configuration of the monitors bound to it, and the publishing of metrics gathered by those monitors.  It is responsible for managing the installation and execution of agents to gather the metrics according to the configured monitors.

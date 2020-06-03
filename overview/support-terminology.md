@@ -53,9 +53,9 @@ Monitors define the gathering of metrics that help to describe the ongoing state
 
 
 At it's most basic, an event task is configured by specifying
-. the field name of a metric,
-. a comparison operator,(like "<" or ">"),
-. and a threshold to be tested against.
+- the field name of a metric,
+- a comparison operator,(like "<" or ">"),
+- and a threshold to be tested against.
 
 So, for example, the cpu plugin gathers a "usage_user" metric, which states the percent of the cpu being used by user processes.  Configuring an event task with field "usage_user", comparsion operator ">" and threshold "20" would cause an event to be generated whenever the user usage goes above 20%.
 

@@ -2,7 +2,7 @@
 ## Resource
 A resource represents an individual device,  i.e. a server, firewall, or load balancer.  These types of resources are generally created automatically.
 
-Resources represent any other object that should be monitored.  e.g. you may create a Resource to represent an entire cloud deployment or even your house for home monitoring.
+Resources can also represent any other object that should be monitored.  e.g. you may create a Resource to represent an entire cloud deployment or even your house for home monitoring.
 
 Resources are created automatically for any server on which an Envoy runs.  (Envoys are described below.)  In addition, they are created by Rackspace Automation for servers that Rackspace is aware of.  Finally, they be created manually through the UI or a Salus api call.
 

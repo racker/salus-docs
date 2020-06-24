@@ -35,7 +35,7 @@ deactivate Kap
 Kafka -\ EEM : consume event
 activate EEM
 
-group if test event task tracked by this instance
+group if test event task tracked by this EEM instance
 
   EEM -> EEM : handle event result or timeout
   activate EEM

@@ -33,7 +33,6 @@ If users are setting up new monitors or new resources it can feel like a stab in
     - only act upon results that contain a `test-task-id` that they have pending
     - resolve the pending API request with the resulting event content, [similar to test-monitor implementation](https://github.com/racker/salus-telemetry-monitor-management/blob/master/src/main/java/com/rackspace/salus/monitor_management/services/TestMonitorService.java#L207)
     - delete the kapacitor task    
-- An API can be implemented by Public API that chains a call to test-monitor with a call to test-event-task, [similar to monitoring.rackspace.net's](https://github.rackspace.com/monitoring-integration/rackspace-monitoring-gui/blob/master/static/js/views/checks_overview.js#L202-L255)  
 
 ## Example TICKscript for a tested event task
 
@@ -52,4 +51,4 @@ stream
 
 ## Sequence diagram
 
-![](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/Rackspace-Segment-Support/salus-docs-internal/master/proposals/test-event-task/sequence.puml)
+![](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/racker/salus-docs/master/design/test-event-task/sequence.puml)

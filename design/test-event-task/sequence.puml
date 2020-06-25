@@ -1,0 +1,60 @@
+@startuml
+title Test Event-Task Sequence
+hide footbox
+
+actor User
+participant "Public API" as PublicAPI
+collections "Event Engine Management" as EEM
+collections "Kapacitor" as Kap
+participant "Kafka/UMB" as Kafka
+
+User -> PublicAPI : POST test-event-task
+activate PublicAPI
+
+PublicAPI -> EEM : POST test-event-task
+activate EEM
+
+EEM -> EEM : track test event task request
+note right
+  CompletableFuture of request
+  and kapacitor reference
+  is stored in a ConcurrentHashMap
+  with generated test-task-id as
+  the key.
+end note
+
+EEM -> Kap : create task
+
+EEM -> Kap : write measurement
+deactivate EEM
+activate Kap
+
+Kap -\ Kafka : produce event
+deactivate Kap
+
+Kafka -\ EEM : consume event
+activate EEM
+
+group if test event task tracked by this EEM instance
+
+  EEM -> EEM : handle event result or timeout
+  activate EEM
+  note right
+  Complete the CompletableFuture keyed
+  by test-task-id and remove the tracking
+  entry.
+  end note
+
+  EEM -> Kap : get task stats
+  EEM -> Kap : delete task
+
+  EEM --> PublicAPI : event content
+  deactivate EEM
+  deactivate EEM
+
+end
+
+PublicAPI --> User : event content
+deactivate PublicAPI
+
+@enduml

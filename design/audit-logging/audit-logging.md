@@ -1,3 +1,19 @@
+# Requirements
+Auditing information on each entity that customers and support personnel can alter (Monitors, Resources, etc...)
+Information to be stored should be who updated (and if there was an impersonator who was doing the impersonation) and when.
+
+Auditing information should only be on human interactable objects. Bound Monitors for instance will cause a storage explosion
+and create paging issues with returning result sets.
+
+Displaying information:
+The result set of looking at all of the auditing information will be large. API's should be provided for looking 
+at particular portions of the information (all monitors) or even filtering down to specifics (look at monitor with a specific ID).
+This is particularly helpful when requests come in to validate information for a particular month such as:
+
+"How many monitors were deleted on X account in August?"
+
+"Were the IP's of any resources updated since the beginning of the month?"
+
 # Audit Logging
 Ultimately the code for this is very simple. I created a draft PR that gives support
 for Monitors <https://github.com/racker/salus-telemetry-model/pull/153>. This draft 

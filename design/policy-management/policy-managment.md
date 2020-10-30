@@ -27,7 +27,7 @@ This documents the process performed to create the first ping monitor from the u
 1. This will trigger a `MonitorPolicyEvent` to be sent to UMB for each tenant within the policy's scope
 1. Monitor Mgmt will consume those events and handle each individually
 1. Monitor Mgmt will query for all relevant monitor policies for that tenant
-1. Monitor Mgmt will clone the policy monitor to the tenant if the policy is applicable to the tenant
+1. Monitor Mgmt will clone the monitor template to the tenant if the policy is applicable to the tenant
 1. Monitor Mgmt will perform the standard binding of a monitor
 1. `MonitorBoundEvent`s will be sent to UMB for consumption by the ambassador to process the new bindings.
 
@@ -86,7 +86,7 @@ Some policies may only be set at the global scope, while others may be down to t
 
 ## Object Types
 ### Monitor Policy
-Used to manage default monitor configurations across all tenants.  These control what tenants a specific policy monitor will be cloned and bound to.
+Used to manage default monitor configurations across all tenants.  These control what tenants a specific monitor template will be cloned and bound to.
 
 For example, a monitor policy created with the global scope may lead to the creation of a monitor on every single tenant we know of and then bound to all resources on that tenant.
 
@@ -161,7 +161,7 @@ hybrid:555433 | AccountType | Dedicated
 
 ## Monitor Policy Creation / Deletion
 
-A new monitor policy creation will simply clone the monitor policy to the individual tenants effected by that policy and it will then act in the same way as any other monitor on their account.  The one exception is that these cloned monitors cannot be deleted from the tenant.  The method to remove a cloned policy monitor is to have that customer opt-out of the policy.
+A new monitor policy creation will simply clone the monitor policy to the individual tenants effected by that policy and it will then act in the same way as any other monitor on their account.  The one exception is that these cloned monitors cannot be deleted from the tenant.  The method to remove a cloned monitor using template is to have that customer opt-out of the policy.
 
 If the policy is removed all cloned monitors and their corresponding bound monitors will be removed.
 
@@ -174,10 +174,10 @@ If the policy is removed all cloned monitors and their corresponding bound monit
 1. For each event it will
     1. Get the effective policies for the tenant
     1. If the policy in the MonitorPolicyEvent is in effect
-        1. Clone the policy monitor
+        1. Clone the monitor template
         1. Set the customer tenant on the newly cloned monitor
         1. Refresh the metadata fields on the monitor to reflect the metadata policies applied to this tenant
-        1. Link the cloned monitor to the policy monitor id by setting the policyId and policyMonitorId fields  
+        1. Link the cloned monitor to the monitor template id by setting the policyId and policyMonitorId fields  
         1. Save the cloned monitor to the customer tenant
     1. If the policy in the MonitorPolicyEvent is not in effect
         1. Get the customer monitor tied to the monitorId in the MonitorPolicyEvent
@@ -189,11 +189,11 @@ If the policy is removed all cloned monitors and their corresponding bound monit
 
 ## A Monitor used within a Monitor Policy is updated
 
-If the policy monitor is updated it will not affect any customer currently using the policy but simply acts as an update to the template that will be used to clone any new monitors in future.
+If the monitor template is updated it will not affect any customer currently using the policy but simply acts as an update to the template that will be used to clone any new monitors in future.
 
-As metadata policies should be used within a policy monitors fields, no change to the monitor should be significant enough to require a push out to every customer using it.
+As metadata policies should be used within a monitor templates fields, no change to the monitor should be significant enough to require a push out to every customer using it.
 
-In reality an update to a policy monitor will probably never happen.
+In reality an update to a monitor template will probably never happen.
 
 ## A Monitor Policy is updated
 
@@ -202,13 +202,13 @@ Only the scope of a monitor policy can be updated, not the actual monitor id use
 This scenario documents the case where a monitor policy has already been in place and is applied to numerous resources, but then the scope of that policy is updated via the admin api.
 
 1. Tenant's that were previously in-scope and are still in-scope will remain unchanged.
-1. Tenant's that were not previously in-scope but are now will have the policy monitor cloned to their account.
+1. Tenant's that were not previously in-scope but are now will have the monitor template cloned to their account.
 1. Tenant's that were in-scope but no longer are will have the cloned monitor and all related bound monitors removed for their account .
 
 ![](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/racker/salus-docs/master/design/policy-management/diagrams/monitor-policy-update.plantuml)
 
 ## New Resource Created
-Due to policy monitors being cloned to individual tenant's where needed, a new resource coming online will be able to treat all monitors the same.  The policy monitors related to the account will be returned by label matching in exactly the same way as their own created monitors.
+Due to monitor templates being cloned to individual tenant's where needed, a new resource coming online will be able to treat all monitors the same.  The monitor templates related to the account will be returned by label matching in exactly the same way as their own created monitors.
 
 ## Metadata Policy Change
 
@@ -236,7 +236,7 @@ Tenant `12345` will never have a monitor cloned to them for the global ssh polic
 
 When these policies are deleted the actual monitor/task under the `_POLICY_` tenant is not removed, only the policy entry and all cloned monitors tied to that policy. 
 
-If a policy monitor used within a policy is to be removed, it must be done so via the admin api / monitor management after the policy utilizing it has already been removed and the deletion of all cloned monitors has been completed.
+If a monitor template used within a policy is to be removed, it must be done so via the admin api / monitor management after the policy utilizing it has already been removed and the deletion of all cloned monitors has been completed.
 
 ## Other Dependencies
 The account type will have to be populated into tenant metadata somehow, otherwise only the global policies will be used.  This may be able to utilize UMB's account/device info receivers.

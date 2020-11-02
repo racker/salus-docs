@@ -15,7 +15,7 @@ This documents the process performed to create the first ping monitor from the u
 
 1. We will use the Admin API to create one ping monitor
     1. It will be configured just as you would via the public api but the use of policy metadata fields will be maximized (by setting almost every field to `null`)
-1. The monitor will be stored in the same `monitors` table as account level monitors
+1. The monitor template will be stored in the same `monitors` table as account level monitors
     1. Except it will be stored using the tenant id of `_POLICY_`
 1. We will then use the Admin API to create a monitor policy
     1. We will specify the following fields
@@ -121,7 +121,7 @@ These are stored in the `monitor_policies` tables with `name` and `monitor_id` f
   * `name` is a unique string to describe the monitor.
      * It is used to group similar monitor policies across different subscopes
      * e.g. the name "Ping" could be given to any Ping monitor policy so when looking up by tenant it is easy to pick the one effective policy
-  * `monitor_id` will reference the `id` of a monitor created under the `_POLICY_` tenant.
+  * `monitor_id` will reference the `id` of a monitor template created under the `_POLICY_` tenant.
 
 ### Example
 scope | subscope | name | monitor_id
@@ -161,7 +161,7 @@ hybrid:555433 | AccountType | Dedicated
 
 ## Monitor Policy Creation / Deletion
 
-A new monitor policy creation will simply clone the monitor policy to the individual tenants effected by that policy and it will then act in the same way as any other monitor on their account.  The one exception is that these cloned monitors cannot be deleted from the tenant.  The method to remove a cloned monitor using template is to have that customer opt-out of the policy.
+A new monitor policy creation will simply clone the monitor template to the individual tenants effected by that policy and it will then act in the same way as any other monitor on their account.  The one exception is that these cloned monitors cannot be deleted from the tenant.  The method to remove a cloned monitor tied to a template is to have that customer opt-out of the policy.
 
 If the policy is removed all cloned monitors and their corresponding bound monitors will be removed.
 

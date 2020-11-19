@@ -42,13 +42,13 @@ end
 
 group handleMonitorPolicyEvent
 MonitorMgmt-->PolicyMgmt: get effective policies for tenant
-MonitorMgmt-->MonitorMgmt: get monitor tied to policy monitor
+MonitorMgmt-->MonitorMgmt: get monitor tied to monitor template
 opt if policy is not in effect but monitor exists
 MonitorMgmt-->MonitorMgmt: remove bound monitors
 MonitorMgmt-->MonitorMgmt: remove monitor
 else if policy is in effect and monitor not found
 group clone monitor to new tenant
-MonitorMgmt-->MonitorMgmt: deep copy policy monitor
+MonitorMgmt-->MonitorMgmt: deep copy monitor template
 MonitorMgmt-->MonitorMgmt: set new tenantId on monitor
 MonitorMgmt-->MonitorMgmt: set new policyId on monitor
 MonitorMgmt-->PolicyMgmt: get monitor metadata policies for tenant

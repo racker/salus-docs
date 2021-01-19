@@ -1,0 +1,66 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+actor "Public API User" as user
+participant "Public API" as api
+participant "Event Engine Management" as eem
+queue "UMB / Kafka" as umb
+database "MySQL" as db
+collections "Event Engine" as ee
+
+autonumber "[1-0]"
+group Event Engine Startup
+  ee -> db : Load and register all event engine tasks
+end
+
+autonumber "[2-0]"
+group User creates event engine task
+  user -> api ++ : Create task
+  api -> eem ++ : Create task
+  eem -> db : Persist task
+  eem -> umb : Produce task change event
+  return
+  return
+  umb -\ ee : Consume task change event
+  activate ee
+  ee -> db : Load task
+  ee -> ee : Register task in lookup table
+  deactivate ee
+end
+
+autonumber "[3-0]"
+group Event Engine procesing of metric
+  note left of umb
+    Includes metrics routed
+    from Salus Envoys via Salus Ambassador,
+    enriched by UMB, and then produced to UMF topic.
+
+    It is assumed the Kafka message key consists of at
+    least tenant and resource identifier to ensure
+    that Kafka topic-partition utilization is
+    balanced, but also consistently routed via the
+    same topic-partition.
+  end note
+
+  [-> umb : Enriched metric from monitoring source
+
+  umb -\ ee : Consumed metric
+  note right
+    Kafka consumer group mechanism
+    load balances a subset of topic-partitions
+    to each instance of the Event Engine.
+  end note
+activate ee
+  ee -> ee : Match against registered tasks
+  alt matches registered task
+    ee -> ee : Locate/create state machine(s) for context
+    ee -> ee : Process metric via state machine
+    alt state changed for context
+      ee -> umb : Produce notification
+deactivate ee
+    end
+  end
+
+end
+
+@enduml

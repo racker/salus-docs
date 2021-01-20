@@ -1,0 +1,24 @@
+@startuml
+
+actor Deployment
+agent Envoy
+boundary PublicAPI
+boundary Ambassador
+
+component AuthService
+
+storage Vault
+database MySQL
+
+Deployment -- PublicAPI : 1.1 create/retrieve token\nAuthenticated with Identity
+PublicAPI -- AuthService : 1.2 create/retrieve token
+AuthService -- MySQL : 1.3 create/retrieve token
+
+Deployment .. Envoy : 2 configure token
+
+Envoy -- AuthService : 3.1 retrieve cert\nAuthenticated with token
+AuthService -- MySQL : 3.2 validate token
+AuthService -- Vault : 3.3 generate client cert
+Envoy -- Ambassador : 3.4 attach\nMutually authenticated gRPC
+
+@enduml
